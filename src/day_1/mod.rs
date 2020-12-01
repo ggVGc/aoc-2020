@@ -18,7 +18,7 @@ pub fn run() -> i32 {
     1951, 1255, 1786, 1111, 1280, 1625, 1478, 1453,
   ];
 
-  iproduct!(input.iter(), input.iter())
-    .find_map(|(a, b)| if a + b == 2020 { Some(a * b) } else { None })
+  iproduct!(input.iter(), input.iter(), input.iter())
+    .find_map(|(a, b, c)| if a + b + c == 2020 { Some(a * b * c) } else { None })
     .unwrap()
 }
