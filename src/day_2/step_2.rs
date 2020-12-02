@@ -1,11 +1,9 @@
-pub mod step_2;
-extern crate itertools;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::str::FromStr;
 
 pub fn run() -> i32 {
-  let file = File::open("day_2/input").unwrap();
+  let file = File::open("src/day_2/input").unwrap();
   io::BufReader::new(file)
     .lines()
     .map(|line| Line::from_str(&line.unwrap()).unwrap())
@@ -14,10 +12,9 @@ pub fn run() -> i32 {
 }
 
 fn line_valid(line: &Line) -> bool {
-  let count = line.password.matches(line.rule.letter).count() as i32;
-  let bounds = &line.rule.bounds;
-
-  count >= bounds.min && count <= bounds.max
+  let pos_matches = |pos| line.password.chars().nth(pos - 1).unwrap() == line.rule.letter;
+  let positions = &line.rule.positions;
+  pos_matches(positions.a) ^ pos_matches(positions.b)
 }
 
 struct Line {
@@ -26,13 +23,13 @@ struct Line {
 }
 
 struct Rule {
-  bounds: Bounds,
+  positions: Positions,
   letter: char,
 }
 
-struct Bounds {
-  min: i32,
-  max: i32,
+struct Positions {
+  a: usize,
+  b: usize,
 }
 
 impl FromStr for Line {
@@ -42,7 +39,7 @@ impl FromStr for Line {
     let (rule, password) = split_at_char(input, ':');
     Ok(Line {
       rule: Rule::from_str(rule).unwrap(),
-      password: password.to_string(),
+      password: password[2..].to_string(),
     })
   }
 }
@@ -53,20 +50,20 @@ impl FromStr for Rule {
   fn from_str(input: &str) -> Result<Self, Self::Err> {
     let (bounds, letter) = split_at_char(input, ' ');
     Ok(Rule {
-      bounds: Bounds::from_str(bounds).unwrap(),
+      positions: Positions::from_str(bounds).unwrap(),
       letter: letter.chars().nth(1).unwrap(),
     })
   }
 }
 
-impl FromStr for Bounds {
+impl FromStr for Positions {
   type Err = ();
 
   fn from_str(input: &str) -> Result<Self, Self::Err> {
     let (min, max) = split_at_char(input, '-');
-    Ok(Bounds {
-      min: i32::from_str_radix(min, 10).unwrap(),
-      max: i32::from_str_radix(&max[1..], 10).unwrap(),
+    Ok(Positions {
+      a: i32::from_str_radix(min, 10).unwrap() as usize,
+      b: i32::from_str_radix(&max[1..], 10).unwrap() as usize,
     })
   }
 }
