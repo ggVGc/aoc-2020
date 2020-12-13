@@ -1,15 +1,36 @@
+extern crate itertools;
 use std::fs::File;
 use std::io::{self, BufRead};
 
 pub fn run() -> i32 {
   let file = File::open("src/day_5/input").unwrap();
 
-  io::BufReader::new(file)
+  let mut all_seat_ids: Vec<i32> = io::BufReader::new(file)
     .lines()
     .map(|line| parse_seat(&line.unwrap()))
     .map(|seat| get_seat_id(seat))
-    .max()
-    .unwrap()
+    .collect();
+
+  let first_seat = *all_seat_ids.iter().min().unwrap();
+
+  all_seat_ids.sort();
+
+  let missing_seat = all_seat_ids
+    .iter()
+    .zip(all_seat_ids.iter().skip(1))
+    .zip(all_seat_ids.iter().skip(2))
+    .find_map(|((&a, &b), &c)| {
+      if a > first_seat && b == a + 2 && c == b + 1 {
+        Some(a + 1)
+      } else {
+        None
+      }
+    })
+    .unwrap();
+
+  println!("Missing seat: {}", missing_seat);
+
+  *all_seat_ids.iter().max().unwrap()
 }
 
 struct Seat {
